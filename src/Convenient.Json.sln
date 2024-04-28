@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convenient.Json", "Convenient.Json\Convenient.Json.csproj", "{C247B625-4839-4706-85FC-967CCA7CFF26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convenient.Json.Tests", "Convenient.Json.Tests\Convenient.Json.Tests.csproj", "{F12A2339-0250-404B-9BCC-78DBB414C7E1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C247B625-4839-4706-85FC-967CCA7CFF26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C247B625-4839-4706-85FC-967CCA7CFF26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C247B625-4839-4706-85FC-967CCA7CFF26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C247B625-4839-4706-85FC-967CCA7CFF26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F12A2339-0250-404B-9BCC-78DBB414C7E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F12A2339-0250-404B-9BCC-78DBB414C7E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F12A2339-0250-404B-9BCC-78DBB414C7E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F12A2339-0250-404B-9BCC-78DBB414C7E1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
