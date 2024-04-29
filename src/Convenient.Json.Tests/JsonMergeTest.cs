@@ -30,7 +30,6 @@ public class JsonMergeTest
     [Fact]
     public void MergeString()
     {
-        
         var first = JsonDocument.Parse("""
                                        {
                                          "property": "originalValue"

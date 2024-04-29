@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Convenient.Json.Equality;
 
-public static class JsonDocumentEqualExtensions
+public static class JsonDocumentEqualityExtensions
 {
     public static bool DeepEquals(this JsonDocument first, JsonDocument second)
     {
@@ -22,28 +22,27 @@ public static class JsonDocumentEqualExtensions
     
     public static bool DeepEquals(this JsonElement firstElement, JsonElement secondElement)
     {
-        var path = new PropertyPath();
+        var path = new JsonEqualityError();
         return firstElement.DeepEquals(secondElement, path);   
     }
     
     public static bool DeepEquals(this JsonElement firstElement, JsonElement secondElement, [MaybeNullWhen(true)] out JsonEqualityError error)
     {
-        var path = new PropertyPath();
-        if (firstElement.DeepEquals(secondElement, path))
+        error = new JsonEqualityError();
+        if (firstElement.DeepEquals(secondElement, error))
         {
             error = default;
             return true;
         }
 
-        error = new JsonEqualityError(path.Path, path.ErrorMessage);
         return false;
     }
 
-    private static bool DeepEquals(this JsonElement firstElement, JsonElement secondElement, PropertyPath path)
+    private static bool DeepEquals(this JsonElement firstElement, JsonElement secondElement, JsonEqualityError error)
     {
         if (firstElement.ValueKind != secondElement.ValueKind)
         {
-            path.ErrorMessage = "Different value kinds";
+            error.Fail("Different value kinds");
             return false;
         }
         
@@ -51,11 +50,11 @@ public static class JsonDocumentEqualExtensions
         {
             case (JsonValueKind.Object, JsonValueKind.Object):
             {
-                return firstElement.DeepEqualsObjects(secondElement, path);
+                return firstElement.DeepEqualsObjects(secondElement, error);
             }
             case (JsonValueKind.Array, JsonValueKind.Array):
             {
-                return firstElement.DeepEqualsArrays(secondElement, path);
+                return firstElement.DeepEqualsArrays(secondElement, error);
             }
             case (JsonValueKind.True, JsonValueKind.True):
             case (JsonValueKind.False, JsonValueKind.False):
@@ -69,40 +68,40 @@ public static class JsonDocumentEqualExtensions
                     return true;
                 }
 
-                path.ErrorMessage = "Values differ";
+                error.Fail("Values differ");
                 return false;
         }
 
         return false;
     }
 
-    private static bool DeepEqualsObjects(this JsonElement firstElement, JsonElement secondElement, PropertyPath path)
+    private static bool DeepEqualsObjects(this JsonElement firstElement, JsonElement secondElement, JsonEqualityError error)
     {
         foreach (var property in firstElement.EnumerateObject())
         {
             if (!secondElement.TryGetProperty(property.Name, out var secondPropertyValue))
             {
-                path.ErrorMessage = $"{path} missing in second element";
+                error.Fail("Missing property in second element");
                 return false;
             }
 
-            using (path.Push(property.Name))
+            using (error.Enter(property.Name))
             {
-                return property.Value.DeepEquals(secondPropertyValue, path);    
+                return property.Value.DeepEquals(secondPropertyValue, error);    
             }
         }
 
         return true;
     }
 
-    private static bool DeepEqualsArrays(this JsonElement firstElement, JsonElement secondElement, PropertyPath path)
+    private static bool DeepEqualsArrays(this JsonElement firstElement, JsonElement secondElement, JsonEqualityError error)
     {
         var firstEnumerator = firstElement.EnumerateArray();
         var secondEnumerator = secondElement.EnumerateArray();
 
         if (firstEnumerator.GetCount() != secondEnumerator.GetCount())
         {
-            path.ErrorMessage = "Differ in size";
+            error.Fail("Differ in size");
             return false;
         }
         
@@ -111,10 +110,12 @@ public static class JsonDocumentEqualExtensions
         {
             secondEnumerator.MoveNext();
             var secondItem = secondEnumerator.Current;
-            using var _ = path.Push($"[{ii}]");
-            if (!firstItem.DeepEquals(secondItem, path))
+            using (error.Enter($"[{ii}]"))
             {
-                return false;
+                if (!firstItem.DeepEquals(secondItem, error))
+                {
+                    return false;
+                }    
             }
 
             ii++;

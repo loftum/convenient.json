@@ -2,9 +2,9 @@ namespace Convenient.Json.Equality;
 
 internal class StackPopper : IDisposable
 {
-    private readonly PropertyPath _path;
+    private readonly JsonEqualityError _path;
 
-    public StackPopper(PropertyPath path)
+    public StackPopper(JsonEqualityError path)
     {
         _path = path;
     }
