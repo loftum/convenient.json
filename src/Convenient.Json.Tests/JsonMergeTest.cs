@@ -1,6 +1,11 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
+using Convenient.Json.Equality;
+using Convenient.Json.Merge;
+using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Convenient.Json.Tests;
 
@@ -23,63 +28,43 @@ public class JsonMergeTest
     }
 
     [Fact]
-    public void MergeSimpleValue()
+    public void MergeString()
     {
-        var first = new MergeObject()
+        
+        var first = JsonDocument.Parse("""
+                                       {
+                                         "property": "originalValue"
+                                       }
+                                       """);
+
+        var second = JsonDocument.Parse("""
+                                          {
+                                          "property": "overriddenValue"
+                                          }
+                                          """);
+        var result = first.MergeWith(second);
+
+        if (!result.DeepEquals(JsonDocument.Parse("""
+                                                  {
+                                                  "property": "overriddenValue"
+                                                  }
+                                                  """), out var error))
         {
-            StringValue = "value",
-            IntValue = 42,
-            BoolValue = true,
-            DateTimeOffsetValue = new DateTimeOffset(1981, 04, 17, 0, 0, 0, TimeSpan.Zero),
-            StringArray = ["a", "b", "c"],
-            MergeObjects = new Dictionary<string, MergeObject>
-            {
-                ["unchanged"] = new MergeObject(),
-                ["changed"] = new MergeObject(),
-                ["toBeRemoved"] = new MergeObject()
-            }
-        };
-
-        var second = new MergeObject()
-        {
-            StringValue = "value",
-            IntValue = 42,
-            BoolValue = true,
-            DateTimeOffsetValue = new DateTimeOffset(1981, 04, 17, 0, 0, 0, TimeSpan.Zero),
-            StringArray = [],
-            MergeObjects = new Dictionary<string, MergeObject>
-            {
-                ["changed"] = new MergeObject
-                {
-                    IntValue = 47
-                },
-                ["toBeRemoved"] = null
-            }
-        };
-
-        var result = JsonMerger.MergeObjectsTo<MergeObject>(first, second, new JsonMergeOptions
-        {
-            NullValueStrategy = NullValueMergeStrategy.Unset
-        });
-    }
-
-    private static readonly JsonSerializerOptions Pretty = new JsonSerializerOptions
-    {
-        WriteIndented = true
-    };
-
-    private void Print(object o)
-    {
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(o, Pretty));
+            throw FailException.ForFailure(error.ToString());
+        }
     }
 }
 
-public class MergeObject
+
+public static class TestOutputHelperExtensions
 {
-    public string StringValue { get; set; }
-    public int IntValue { get; set; }
-    public bool BoolValue { get; set; }
-    public DateTimeOffset DateTimeOffsetValue { get; set; }
-    public string[] StringArray { get; set; }
-    public Dictionary<string, MergeObject> MergeObjects { get; set; }
+    private static readonly JsonSerializerOptions Pretty = new()
+    {
+        WriteIndented = true
+    };
+    
+    public static void WritePretty(this ITestOutputHelper output, object value)
+    {
+        output.WriteLine(JsonSerializer.Serialize(value, Pretty));
+    }
 }

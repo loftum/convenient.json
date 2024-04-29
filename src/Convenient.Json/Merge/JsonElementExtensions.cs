@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Convenient.Json;
+namespace Convenient.Json.Merge;
 
 internal static class JsonElementExtensions
 {

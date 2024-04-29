@@ -1,4 +1,4 @@
-namespace Convenient.Json;
+namespace Convenient.Json.Merge;
 
 public enum ArrayMergeStrategy
 {

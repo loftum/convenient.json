@@ -1,31 +1,32 @@
 using System.Buffers;
 using System.Text.Json;
 
-namespace Convenient.Json;
+namespace Convenient.Json.Merge;
 
-public static class JsonDocumentExtensions
+public static class JsonDocumentMergeExtensions
 {
-    public static JsonDocument MergeWith(this JsonDocument first, JsonDocument second, JsonMergeOptions options)
+    public static JsonDocument MergeWith(this JsonDocument first, JsonDocument second, JsonMergeOptions options = null)
     {
+        options ??= JsonMergeOptions.Default;
         var buffer = new ArrayBufferWriter<byte>();
         using var writer = new Utf8JsonWriter(buffer);
 
-        var original = first.RootElement;
-        var modified = second.RootElement;
-        switch (original.ValueKind, modified.ValueKind)
+        var firstElement = first.RootElement;
+        var secondElement = second.RootElement;
+        switch (firstElement.ValueKind, secondElement.ValueKind)
         {
             case (JsonValueKind.Object, JsonValueKind.Object):
-                MergeObjects(writer, original, modified, options);
+                MergeObjects(writer, firstElement, secondElement, options);
                 break;
             case (JsonValueKind.Array, JsonValueKind.Array):
-                MergeArrays(writer, original, modified, options);
+                MergeArrays(writer, firstElement, secondElement, options);
                 break;
             default:
-                throw new InvalidOperationException($"Cannot merge {original.ValueKind} with {modified.ValueKind}");
+                throw new InvalidOperationException($"Cannot merge {firstElement.ValueKind} with {secondElement.ValueKind}");
         }
         
         writer.Flush();
-        
+
         return JsonDocument.Parse(buffer.WrittenMemory);
     }
     
