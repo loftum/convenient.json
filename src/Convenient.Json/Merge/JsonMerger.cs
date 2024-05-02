@@ -1,7 +1,6 @@
 using System.Text.Json;
-using Convenient.Json.Merge;
 
-namespace Convenient.Json.Equality;
+namespace Convenient.Json.Merge;
 
 public static class JsonMerger
 {
